@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TEKNIVOS</string>
+    <string name="title_activity_main">TEKNIVOS</string>
+    <string name="package_name">com.teknivos.pos</string>
+    <string name="custom_url_scheme">com.teknivos.pos</string>
+</resources>
