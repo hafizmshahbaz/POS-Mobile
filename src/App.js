@@ -1,8 +1,8 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 
-const API_URL = `http://${window.location.hostname}:8000`;
+const API_URL = `http://192.168.100.15:8000`;
 
-// --- CUSTOM SVG LINE CHART COMPONENT ---
 const SimpleLineChart = ({ data }) => {
     if (!data || data.length === 0) return <p style={{color:'gray', textAlign:'center', marginTop:'50px'}}>No data available</p>;
     const maxVal = Math.max(...data.map(d => d.revenue), 100);
@@ -40,11 +40,8 @@ const SimpleLineChart = ({ data }) => {
 };
 
 function App() {
-    // ==========================================
-    // STATES
-    // ==========================================
     const[activeTab, setActiveTab] = useState(() => localStorage.getItem("activeTab") || "Dashboard"); 
-    const[isSidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768); // Mobile par default band
+    const[isSidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
     const [cart, setCart] = useState(() => { const s = localStorage.getItem("posCart"); return s ? JSON.parse(s) :[]; });
     
     useEffect(() => { localStorage.setItem("activeTab", activeTab); }, [activeTab]);
@@ -54,8 +51,7 @@ function App() {
     const [dashboardStats, setDashboardStats] = useState(null);
     const [customers, setCustomers] = useState([]);
     const [orders, setOrders] = useState([]);
-    const [reports, setReports] = useState(null);
-    const [settings, setSettings] = useState({ business_name: "TEKNIVOS", phone: "", email: "", address: "", currency_symbol: "Rs.", tax_rate: 0, low_stock_alert_level: 5, receipt_message: "Thank you for your business!", logo: "" });
+    const [settings, setSettings] = useState({ business_name: "TEKNIVOS", phone: "", email: "", address: "", currency_symbol: "Rs.", tax_rate: 0, low_stock_alert_level: 5, receipt_message: "Thank you!", logo: "" });
 
     const[productModal, setProductModal] = useState({ open: false, isEdit: false, id: null });
     const[customerModal, setCustomerModal] = useState({ open: false, isEdit: false, id: null });
@@ -82,7 +78,6 @@ function App() {
     const loadDashboard = () => fetch(`${API_URL}/dashboard`).then(res => res.json()).then(setDashboardStats).catch(console.error);
     const loadCustomers = () => fetch(`${API_URL}/customers`).then(res => res.json()).then(setCustomers).catch(console.error);
     const loadOrders = () => fetch(`${API_URL}/orders`).then(res => res.json()).then(setOrders).catch(console.error);
-    const loadReports = () => fetch(`${API_URL}/reports`).then(res => res.json()).then(setReports).catch(console.error);
     const loadSettings = () => fetch(`${API_URL}/settings`).then(res => res.json()).then(setSettings).catch(console.error);
 
     useEffect(() => {
@@ -91,7 +86,6 @@ function App() {
         if (activeTab === "Dashboard") loadDashboard();
         if (activeTab === "Customers" || activeTab === "POS/Billing") loadCustomers();
         if (activeTab === "Orders") loadOrders();
-        if (activeTab === "Reports") loadReports();
     }, [activeTab]);
 
     const saveProduct = (e) => {
@@ -122,11 +116,6 @@ function App() {
         const url = customerModal.isEdit ? `${API_URL}/customers/${customerModal.id}` : `${API_URL}/customers`;
         fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(customerForm) })
         .then(() => { loadCustomers(); setCustomerModal({ open: false }); }).catch(() => alert("Network Error"));
-    };
-
-    const openEditCustomer = (c) => { 
-        setCustomerForm({ name: c.name, phone: c.phone, email: c.email || "" }); 
-        setCustomerModal({ open: true, isEdit: true, id: c.id }); 
     };
 
     const saveSettings = () => {
@@ -172,7 +161,6 @@ function App() {
     const filteredCustomers = customers.filter(c => c.name.toLowerCase().includes(custSearch.toLowerCase()) || c.phone.includes(custSearch));
     const filteredOrders = orderDateFilter ? orders.filter(o => o.date.startsWith(orderDateFilter)) : orders;
 
-    // --- STYLES ---
     const styles = {
         appContainer: { display: 'flex', height: '100vh', backgroundColor: '#f4f6f9', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" },
         sidebar: { width: isSidebarOpen ? '260px' : '0px', backgroundColor: '#0B132B', color: '#8A94A6', display: 'flex', flexDirection: 'column', transition: 'width 0.3s', overflow: 'hidden', flexShrink: 0 },
@@ -185,7 +173,8 @@ function App() {
         btnPrimary: { backgroundColor: '#1D4ED8', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' },
         modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 },
         modalBox: { backgroundColor: 'white', padding: '30px', borderRadius: '12px', width: '500px', maxWidth: '90%', boxShadow: '0 10px 25px rgba(0,0,0,0.2)', maxHeight: '90vh', overflowY: 'auto' },
-        payBtn: (active) => ({ flex: 1, padding: '15px', borderRadius: '8px', border: active ? '2px solid #1D4ED8' : '1px solid #d1d5db', backgroundColor: active ? '#eff6ff' : 'white', color: active ? '#1D4ED8' : '#374151', fontWeight: 'bold', cursor: 'pointer', textAlign: 'center' })
+        payBtn: (active) => ({ flex: 1, padding: '15px', borderRadius: '8px', border: active ? '2px solid #1D4ED8' : '1px solid #d1d5db', backgroundColor: active ? '#eff6ff' : 'white', color: active ? '#1D4ED8' : '#374151', fontWeight: 'bold', cursor: 'pointer', textAlign: 'center' }),
+        btnAction: { background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', margin: '0 5px', color: '#6B7280' }
     };
 
     const tabs =[{ n: "Dashboard", i: "📊" }, { n: "POS/Billing", i: "🛒" }, { n: "Products", i: "📦" }, { n: "Customers", i: "👥" }, { n: "Orders", i: "📜" }, { n: "Reports", i: "📈" }, { n: "Settings", i: "⚙️" }];
@@ -193,8 +182,6 @@ function App() {
 
     return (
         <div style={styles.appContainer}>
-            
-            {/* --- CSS OVERRIDES FOR MOBILE --- */}
             <style>{`
                 @media (max-width: 768px) {
                     .sidebar-container { position: absolute; z-index: 2000; height: 100%; box-shadow: 10px 0 15px rgba(0,0,0,0.1); }
@@ -203,7 +190,6 @@ function App() {
                     .pos-right { margin-top: 20px; }
                     .table-wrapper { overflow-x: auto; }
                     .modal-box { width: 95% !important; padding: 15px !important; }
-                    .stat-card h2 { fontSize: 18px !important; }
                 }
                 @media print {
                     @page { margin: 0; size: 80mm auto; }
@@ -215,49 +201,43 @@ function App() {
                 }
             `}</style>
 
-            {/* --- SIDEBAR --- */}
             <div style={styles.sidebar} className="no-print sidebar-container">
                 <div style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid #1C253C', minWidth: '260px' }}>
                     <img src="/image.png" alt="" style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'contain' }} />
-                    <div><h3 style={{ margin: 0, fontSize: '18px', color: 'white' }}>TEKNIVOS</h3><span style={{ fontSize: '11px', color: '#f3f3f3' }}>Business Software</span></div>
+                    <div><h3 style={{ margin: 0, fontSize: '18px', color: 'white' }}>TEKNIVOS</h3></div>
                 </div>
                 <div style={{ padding: '15px 10px', flex: 1, overflowY: 'auto', minWidth: '240px' }}>
                     {tabs.map(tab => <div key={tab.n} onClick={() => { setActiveTab(tab.n); if(window.innerWidth < 768) setSidebarOpen(false); }} style={styles.menuItem(activeTab === tab.n)}><span>{tab.i}</span> {tab.n}</div>)}
                 </div>
             </div>
 
-            {/* --- MAIN CONTENT --- */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className="no-print">
-                
                 <div style={{ backgroundColor: 'white', padding: '15px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                         <button onClick={() => setSidebarOpen(!isSidebarOpen)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>☰</button>
                         <div><h2 style={{ margin: 0, color: '#111827', fontSize: window.innerWidth < 768 ? '18px' : '24px' }}>{activeTab}</h2></div>
                     </div>
-                    <div style={{ textAlign: 'right', fontSize: '12px', color: '#6B7280' }} className="no-print"><strong>Powered by TEKNIVOS</strong></div>
                 </div>
 
                 <div style={{ padding: window.innerWidth < 768 ? '15px' : '30px', overflowY: 'auto', flex: 1 }}>
 
-                    {/* === DASHBOARD === */}
                     {activeTab === "Dashboard" && dashboardStats && (
                         <div>
                             <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px', marginBottom: '20px' }}>
-                                <div style={styles.card} className="stat-card"><small>TODAY</small><h2>{settings.currency_symbol}{dashboardStats.today_sales}</h2></div>
-                                <div style={styles.card} className="stat-card"><small>ORDERS</small><h2>{dashboardStats.total_orders}</h2></div>
-                                <div style={styles.card} className="stat-card"><small>PRODUCTS</small><h2>{dashboardStats.total_products}</h2></div>
-                                <div style={styles.card} className="stat-card"><small>CUSTOMERS</small><h2>{customers.length}</h2></div>
+                                <div style={styles.card}><small>TODAY</small><h2>{settings.currency_symbol}{dashboardStats.today_sales}</h2></div>
+                                <div style={styles.card}><small>ORDERS</small><h2>{dashboardStats.total_orders}</h2></div>
+                                <div style={styles.card}><small>PRODUCTS</small><h2>{dashboardStats.total_products}</h2></div>
+                                <div style={styles.card}><small>CUSTOMERS</small><h2>{customers.length}</h2></div>
                             </div>
                             <div style={{...styles.card, marginBottom: '20px'}}><h3>Sales Trend</h3><SimpleLineChart data={dashboardStats.chart_data} /></div>
                         </div>
                     )}
 
-                    {/* === POS / BILLING === */}
                     {activeTab === "POS/Billing" && (
                         <div className="pos-container" style={{ display: 'flex', gap: '20px', height: '100%' }}>
                             <div style={{ flex: 2, display: 'flex', flexDirection: 'column' }}>
                                 <input type="text" placeholder="Search product..." value={posSearch} onChange={e=>setPosSearch(e.target.value)} style={{...styles.input, marginBottom: '15px'}} />
-                                <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px' }}>
+                                <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '10px' }}>
                                     {categories.map(cat => <button key={cat} onClick={() => setPosCategory(cat)} style={{ padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', border: posCategory === cat ? 'none' : '1px solid #d1d5db', backgroundColor: posCategory === cat ? '#1D4ED8' : 'white', color: posCategory === cat ? 'white' : '#374151', whiteSpace:'nowrap' }}>{cat}</button>)}
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px', overflowY: 'auto', paddingBottom:'20px' }}>
@@ -293,28 +273,28 @@ function App() {
                         </div>
                     )}
 
-                    {/* === OTHER TABS (WRAP TABLES IN DIV) === */}
                     {(activeTab === "Products" || activeTab === "Customers" || activeTab === "Orders") && (
                         <div style={styles.card} className="table-wrapper">
-                             {/* ... logic for tables stays same, just wrapper added ... */}
-                             <p style={{fontSize:'12px', color:'gray'}}>Scroll horizontally to see full table on mobile.</p>
+                            <div style={{display:'flex', justifyContent:'space-between', marginBottom:'15px'}}>
+                                {activeTab === "Products" && <input placeholder="Search..." value={prodSearch} onChange={e=>setProdSearch(e.target.value)} style={{...styles.input, width:'200px'}}/>}
+                                {activeTab === "Customers" && <input placeholder="Search..." value={custSearch} onChange={e=>setCustSearch(e.target.value)} style={{...styles.input, width:'200px'}}/>}
+                                {activeTab === "Products" && <button onClick={()=>setProductModal({open:true, isEdit:false})} style={styles.btnPrimary}>+ Add</button>}
+                            </div>
                              <table style={styles.table}>
-                                {/* Saara purana table code yahan aye ga */}
                                 <thead>
                                     {activeTab === "Products" && <tr><th style={styles.th}>Name</th><th style={styles.th}>Price</th><th style={styles.th}>Stock</th><th style={styles.th}>Actions</th></tr>}
                                     {activeTab === "Customers" && <tr><th style={styles.th}>Name</th><th style={styles.th}>Phone</th><th style={styles.th}>Balance</th></tr>}
                                     {activeTab === "Orders" && <tr><th style={styles.th}>Order #</th><th style={styles.th}>Total</th><th style={styles.th}>Action</th></tr>}
                                 </thead>
                                 <tbody>
-                                    {activeTab === "Products" && filteredProducts.map(p => <tr key={p.id}><td style={styles.td}>{p.name}</td><td style={styles.td}>{p.selling_price}</td><td style={styles.td}>{p.stock_level}</td><td style={styles.td}><button onClick={()=>openEditProduct(p)}>Edit</button></td></tr>)}
+                                    {activeTab === "Products" && filteredProducts.map(p => <tr key={p.id}><td style={styles.td}>{p.name}</td><td style={styles.td}>{p.selling_price}</td><td style={styles.td}>{p.stock_level}</td><td style={styles.td}><button onClick={()=>openEditProduct(p)} style={styles.btnAction}>Edit</button><button onClick={()=>deleteProduct(p.id)} style={{...styles.btnAction, color:'red'}}>Del</button></td></tr>)}
                                     {activeTab === "Customers" && filteredCustomers.map(c => <tr key={c.id}><td style={styles.td}>{c.name}</td><td style={styles.td}>{c.phone}</td><td style={styles.td}>{c.balance}</td></tr>)}
-                                    {activeTab === "Orders" && filteredOrders.map(o => <tr key={o.id}><td style={styles.td}>#{o.id}</td><td style={styles.td}>{o.total}</td><td style={styles.td}><button onClick={()=>setOrderDetails(o)}>View</button></td></tr>)}
+                                    {activeTab === "Orders" && filteredOrders.map(o => <tr key={o.id}><td style={styles.td}>#{o.id}</td><td style={styles.td}>{o.total}</td><td style={styles.td}><button onClick={()=>setOrderDetails(o)} style={styles.btnAction}>View</button></td></tr>)}
                                 </tbody>
                              </table>
                         </div>
                     )}
 
-                    {/* === SETTINGS (Responsive Form) === */}
                     {activeTab === "Settings" && (
                         <div style={styles.card}>
                             <input type="file" accept="image/*" onChange={handleLogoUpload} style={{marginBottom:'20px'}}/>
@@ -325,11 +305,9 @@ function App() {
                             </div>
                         </div>
                     )}
-
                 </div>
             </div>
 
-            {/* --- MODALS (Centered & Mobile Width) --- */}
             {checkoutModal && (
                 <div style={styles.modalOverlay}><div style={styles.modalBox} className="modal-box">
                     <h2>Checkout</h2>
@@ -343,28 +321,50 @@ function App() {
                 </div></div>
             )}
 
-            {/* --- RECEIPT MODAL --- */}
-            {(checkoutReceipt || orderDetails) && (
+            {receiptDataToPrint && (
                 <div style={styles.modalOverlay}><div style={{...styles.modalBox, width:'350px'}} className="modal-box">
                     <div id="printable-slip">
                         <div style={{textAlign:'center', borderBottom:'1px dashed #000', paddingBottom:'10px'}}>
                             <h3>{settings.business_name}</h3>
-                            <p>{settings.address}</p>
                         </div>
                         <table style={{width:'100%', fontSize:'12px', marginTop:'10px'}}>
-                             {/* ... same receipt table code ... */}
                              <tbody>
-                                {(checkoutReceipt || orderDetails).items.map((i,idx)=>(
-                                    <tr key={idx}><td>{i.name}</td><td>{i.quantity || i.qty}</td><td style={{textAlign:'right'}}>{(i.price * (i.quantity || i.qty))}</td></tr>
+                                {receiptDataToPrint.items.map((i,idx)=>(
+                                    <tr key={idx}><td>{i.name}</td><td>{i.quantity}</td><td style={{textAlign:'right'}}>{(i.price * i.quantity)}</td></tr>
                                 ))}
                              </tbody>
                         </table>
                         <div style={{borderTop:'1px dashed #000', marginTop:'10px', paddingTop:'10px', textAlign:'right'}}>
-                            <strong>Total: {settings.currency_symbol}{(checkoutReceipt || orderDetails).total}</strong>
+                            <strong>Total: {settings.currency_symbol}{receiptDataToPrint.total}</strong>
                         </div>
                     </div>
-                    <button onClick={()=>window.print()} style={{...styles.btnPrimary, width:'100%', marginTop:'20px'}}>Print Slip</button>
-                    <button onClick={()=>{setCheckoutReceipt(null); setOrderDetails(null)}} style={{width:'100%', marginTop:'10px'}}>Close</button>
+                    <button onClick={()=>window.print()} style={{...styles.btnPrimary, width:'100%', marginTop:'20px'}} className="no-print">Print Slip</button>
+                    <button onClick={()=>{setCheckoutReceipt(null); setOrderDetails(null)}} style={{width:'100%', marginTop:'10px'}} className="no-print">Close</button>
+                </div></div>
+            )}
+
+            {productModal.open && (
+                <div style={styles.modalOverlay} className="no-print"><div style={styles.modalBox} className="modal-box">
+                    <h3>{productModal.isEdit ? 'Edit' : 'Add'} Product</h3>
+                    <form onSubmit={saveProduct} style={{display:'flex', flexDirection:'column', gap:'10px', marginTop:'15px'}}>
+                        <input placeholder="Name" value={formData.name} onChange={e=>setFormData({...formData, name:e.target.value})} required style={styles.input}/>
+                        <input placeholder="Price" type="number" value={formData.selling_price} onChange={e=>setFormData({...formData, selling_price:e.target.value})} required style={styles.input}/>
+                        <input placeholder="Stock" type="number" value={formData.stock_level} onChange={e=>setFormData({...formData, stock_level:e.target.value})} required style={styles.input}/>
+                        <button type="submit" style={styles.btnPrimary}>Save</button>
+                        <button type="button" onClick={()=>setProductModal({open:false})} style={{background:'none', border:'none'}}>Cancel</button>
+                    </form>
+                </div></div>
+            )}
+
+            {customerModal.open && (
+                <div style={styles.modalOverlay} className="no-print"><div style={styles.modalBox} className="modal-box">
+                    <h3>{customerModal.isEdit ? 'Edit' : 'Add'} Customer</h3>
+                    <form onSubmit={saveCustomer} style={{display:'flex', flexDirection:'column', gap:'10px', marginTop:'15px'}}>
+                        <input placeholder="Name" value={customerForm.name} onChange={e=>setCustomerForm({...customerForm, name:e.target.value})} required style={styles.input}/>
+                        <input placeholder="Phone" value={customerForm.phone} onChange={e=>setCustomerForm({...customerForm, phone:e.target.value})} required style={styles.input}/>
+                        <button type="submit" style={styles.btnPrimary}>Save</button>
+                        <button type="button" onClick={()=>setCustomerModal({open:false})} style={{background:'none', border:'none'}}>Cancel</button>
+                    </form>
                 </div></div>
             )}
         </div>
